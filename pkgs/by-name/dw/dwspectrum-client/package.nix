@@ -135,7 +135,6 @@ stdenv.mkDerivation rec {
     cp -r opt usr "$out"/
 
     mkdir -p "$out/bin"
-    ln -s "$out/opt/digitalwatchdog/client/${version}/bin/client" "$out/bin/dwspectrum-client"
 
     substituteInPlace "$out/usr/share/applications/dwspectrum.desktop" \
       --replace-fail "Exec=/opt/digitalwatchdog/client/${version}/bin/applauncher" "Exec=$out/bin/dwspectrum-client"
@@ -146,8 +145,10 @@ stdenv.mkDerivation rec {
   '';
 
   postFixup = ''
-    wrapProgram "$out/bin/dwspectrum-client" \
+    wrapProgram "$out/opt/digitalwatchdog/client/${version}/bin/client" \
       --set QT_XKB_CONFIG_ROOT "${xkeyboard_config}/share/X11/xkb"
+
+    ln -s "$out/opt/digitalwatchdog/client/${version}/bin/client" "$out/bin/dwspectrum-client"
   '';
 
   meta = with lib; {
