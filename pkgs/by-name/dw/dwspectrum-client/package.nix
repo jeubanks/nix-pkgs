@@ -41,6 +41,7 @@
   libxcb-keysyms,
   libxcb-render-util,
   libxcb-wm,
+  vulkan-loader,
   wayland,
   zlib,
 }:
@@ -117,6 +118,13 @@ stdenv.mkDerivation rec {
   dontBuild = true;
   dontWrapQtApps = true;
 
+  runtimeLibraryPath = lib.makeLibraryPath [
+    libGL
+    libsecret
+    stdenv.cc.cc.lib
+    vulkan-loader
+  ];
+
   autoPatchelfIgnoreMissingDeps = [
     "libQt6WaylandEglClientHwIntegration.so.6"
     "libigdgmm.so.12"
@@ -145,7 +153,15 @@ stdenv.mkDerivation rec {
   '';
 
   postFixup = ''
+    substituteInPlace "$out/opt/digitalwatchdog/client/${version}/bin/choose_newer_stdcpp.sh" \
+      --replace-fail '    if command -v ldconfig >/dev/null 2>&1; then' '    if [ -f "${stdenv.cc.cc.lib}/lib/libstdc++.so.6" ]; then' \
+      --replace-fail "        ldconfig -p | grep libstdc++.so.6 | head -n 1 | sed 's/.*=> //'" "        echo \"${stdenv.cc.cc.lib}/lib/libstdc++.so.6\""
+
+    substituteInPlace "$out/opt/digitalwatchdog/client/${version}/bin/client" \
+      --replace-fail "SYSTEM_OPENGL=\"\$(ldconfig -p | grep libOpenGL.so.0 | head -n 1 | sed 's/.*=> //')\"" "SYSTEM_OPENGL=\"${libGL}/lib/libOpenGL.so.0\""
+
     wrapProgram "$out/opt/digitalwatchdog/client/${version}/bin/client" \
+      --prefix LD_LIBRARY_PATH : "${runtimeLibraryPath}" \
       --set QT_XKB_CONFIG_ROOT "${xkeyboard_config}/share/X11/xkb"
 
     ln -s "$out/opt/digitalwatchdog/client/${version}/bin/client" "$out/bin/dwspectrum-client"
