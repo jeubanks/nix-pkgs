@@ -123,6 +123,23 @@ stdenv.mkDerivation rec {
     libsecret
     stdenv.cc.cc.lib
     vulkan-loader
+    wayland
+    libxkbcommon
+    libxcb
+    libxcb-util
+    libxcb-cursor
+    libxcb-image
+    libxcb-keysyms
+    libxcb-render-util
+    libxcb-wm
+    libx11
+    libxcomposite
+    libxcursor
+    libxext
+    libxfixes
+    libxi
+    libxrandr
+    libxrender
   ];
 
   autoPatchelfIgnoreMissingDeps = [
@@ -164,6 +181,9 @@ stdenv.mkDerivation rec {
 
     wrapProgram "$out/opt/digitalwatchdog/client/${version}/bin/client" \
       --prefix LD_LIBRARY_PATH : "${runtimeLibraryPath}" \
+      --set QT_QPA_PLATFORM "xcb" \
+      --set QT_QPA_PLATFORM_PLUGIN_PATH "$out/opt/digitalwatchdog/client/${version}/plugins/platforms" \
+      --set QT_PLUGIN_PATH "$out/opt/digitalwatchdog/client/${version}/plugins" \
       --set QT_XKB_CONFIG_ROOT "${xkeyboard_config}/share/X11/xkb"
 
     ln -s "$out/opt/digitalwatchdog/client/${version}/bin/client" "$out/bin/dwspectrum-client"
