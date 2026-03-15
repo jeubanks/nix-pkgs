@@ -140,13 +140,15 @@ stdenv.mkDerivation rec {
     runHook preInstall
 
     mkdir -p "$out"
-    cp -r opt usr "$out"/
+    cp -r opt "$out"/
+    mkdir -p "$out/share"
+    cp -r usr/share/. "$out/share/"
 
     mkdir -p "$out/bin"
 
-    substituteInPlace "$out/usr/share/applications/dwspectrum.desktop" \
+    substituteInPlace "$out/share/applications/dwspectrum.desktop" \
       --replace-fail "Exec=/opt/digitalwatchdog/client/${version}/bin/applauncher" "Exec=$out/bin/dwspectrum-client"
-    substituteInPlace "$out/usr/share/applications/dw-vms.desktop" \
+    substituteInPlace "$out/share/applications/dw-vms.desktop" \
       --replace-fail "Exec=/opt/digitalwatchdog/client/${version}/bin/client %u" "Exec=$out/bin/dwspectrum-client %u"
 
     runHook postInstall
